@@ -28,6 +28,8 @@ import ru.i_novus.common.sign.Init;
 import ru.i_novus.common.sign.api.SignAlgorithmType;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.security.*;
@@ -153,5 +155,41 @@ public class CryptoFormatConverter {
             //NOP
         }
         return getBase64Decoded(pem.replaceAll("\\r\\n|\\n", ""));
+    }
+    
+    public PrivateKey getPKFromPFXfile(String path, String passwd)  {
+
+        char[] pass = passwd.toCharArray();
+
+        BouncyCastleProvider provider = new BouncyCastleProvider();
+        Security.addProvider(provider);
+        KeyStore ks;
+		try {
+			ks = KeyStore.getInstance("pkcs12", provider.getName());
+	        ks.load(new FileInputStream(path), pass);
+	        String alias = (String) ks.aliases().nextElement(); /* alias='CCA India 2011\u0000'*/
+	        return  (PrivateKey) ks.getKey(alias, pass);/* returns null */
+		} catch (KeyStoreException | NoSuchProviderException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CertificateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnrecoverableKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
+
     }
 }
